@@ -1,1 +1,343 @@
+<aside>
+⏰ Duration: You should not spend more than **12 hours** on this problem.
+*Time estimation is for internship roles, if you are a software professional you should spend significantly less time.*
 
+</aside>
+
+# Task
+
+Architecture a **highly available trading system** with similar features to the Binance trading platform [https://www.binance.com](https://www.binance.com/en). This system will need to be **resilient** to **failures**, **scalable**, and **cost-effective**. You should **design** the architecture, choose the **appropriate technologies**, and **explain** your approach for maintaining **high availability and scalability.** 
+
+Due to time constraint, you will not be able to cover every feature on the reference platform, so choose some features that will help you demonstrate your mastery of cloud infrastructure. 
+
+### Deliverables
+
+Your submission should include:
+
+- An overview **diagram** of the **services used** and what **role** they play in the system.
+- **Elaboration** on why each cloud service is used and what are the **alternatives** considered.
+- **Plans for scaling** when the product grows beyond your current setup.
+
+### Specifications
+
+You are limited to the following constraints for your plan.
+
+| Cloud Provider | Amazon Web Services (**AWS**) |
+| --- | --- |
+| Throughput | **500 RPS** (requests per second) |
+| Response Time | p99 response time of <100ms |
+
+# Analysis
+
+## **System component**
+
+- Environment: DEV, QAC, STG, PRD
+- Programming:
+    - Fe: React
+    - Be: Node.js
+- Network
+    - CDN: Cloud Front + S3
+    - Domain: Route53
+    - Network: VPC (03 layers), InternetGW, NATGW, ElasticIP, PublicIP, etc.
+- Active Directory: AWS Cloud Diretory
+- SVC: GitLab server
+- CICD
+    - CI: GitLab CI
+    - CD: ArgoCD
+- Microservices:
+    - API gateway: AWS APIGW
+    - Front-end
+        - Portal: EKS
+    - Back-end
+        - Message broker: AWS S3 - SNS - SQS
+        - Business logic: EKS
+            - SSO, Sign up, Login, Logout, Forget password, trading view portal, crypto transaction, deposit (crypto, money, P2P), withdraw money, statistics (profit, asset, etc), asset management (earn, spot, futures, wallet, etc), trade, futures, notification, news, support service, refers, events, gift & campain, etc.
+        - Notification: AWS SES
+    - Database
+        - SQL: AWS RDS (MySQL, Postgres, etc)
+        - NoSQL: Amazon DocumentDB, AWS DynamoDB
+    - Storage
+        - VM disk
+        - Metadata: AWS S3
+    - Cache: ElastiCache
+
+## Deployments strategy
+
+- Rolling
+- Blue/Green
+- Canary
+
+## Monitoring & Logging & Alerting
+
+- Monitoring: Prometheus, Grafana, etc
+- Logging: Loki, Promtail
+- Alerting: Alert Manager
+
+## Security
+
+- DevSecOps
+- AWS WAF, AWS Shield, Security Group, NACL, AppArmor, Kube-bench, KubeSec, etc
+
+## Application flow
+
+- Traffic
+    - External → Application
+        - End user → Domain → AWS Route53 → AWS CloudFront → AWS WAF → VPC → Internet GW Public subnet → AWS ALB → NAT → Private subnet → Ingress → K8s cluster ↔ DB
+    - Internal
+        - Ingree ↔ K8s cluster → Portal → Message broker → Business logic → DB
+
+## Failures strategy
+
+https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html
+
+- Backup & Restore
+- Pilot light
+- Warn standby
+- Multi site active/active
+
+## Scalable
+
+- Horizontal Scaling
+- Database Scaling
+- Load Balancing
+- Asynchronous Processing
+- Edge Caching
+
+## Cost-effective
+
+- Cost components
+    - Resources cost
+    - Traffic outbound
+    - Operation cost
+- Cost estimation report
+- Highly available
+    - Multi zone
+
+# Solution: Trading System Architecture Microservices on AWS EKS cluster
+
+This architecture provides a **resilient, highly available, scalable, and cost-effective** trading platform similar to Binance, hosted on **AWS**. The design leverages **microservices, containerization, messaging systems, and scalable databases** to handle **high transaction volumes** with **low latency (<100ms response time at p99), resilience against failures, and satisfy within 500 RPS**.
+
+## **1. Architecture**
+
+### **Architecture Diagram**
+
+Here is the high-level **architecture diagram** for the trading system on AWS. It visually represents the key components, network flow, and AWS infrastructure used for **scalability, resilience, and cost efficiency**.
+
+**Refers**
+
+- https://aws.amazon.com/blogs/containers/how-to-use-multiple-load-balancer-target-group-support-for-amazon-ecs-to-access-internal-and-external-service-endpoint-using-the-same-dns-name/
+- https://aws.amazon.com/blogs/networking-and-content-delivery/integrating-your-directory-services-dns-resolution-with-amazon-route-53-resolvers/
+- https://docs.aws.amazon.com/whitepapers/latest/active-directory-domain-services/design-consideration-for-aws-managed-microsoft-active-directory.html
+- https://aws.amazon.com/blogs/database/configuring-amazon-elasticache-for-redis-for-higher-availability/
+
+![image.png](attachment:28e8cf0c-2134-48a7-a6c0-0f3a99b0cc4e:image.png)
+
+### Architecture components and explaination
+
+| **Category** | **Technology Stack** | **Purpose** | **Alternatives considered** |
+| --- | --- | --- | --- |
+| **Cloud Provider** | AWS | Provides global scalability, redundancy, and cost efficiency. | Azure/GCP |
+| **Environments** | DEV, QAC, STG, PRD | Isolated environments for development, testing, pre-production and production. | N/A |
+| **SVC** | Gitlab Server | Provides a private repositories, issue-following capabilities, and wikis | Github Server |
+| **Programming** | Fe: React
+Be: Node.js | Frontend for user interfaces
+
+Backend for trading logic | N/A |
+| **CI/CD** | CI: GitLab CI
+CD: ArgoCD | Automated CI and CD to build an application image and deploy and container orchestration. | CI: Github Action
+CD: Harness CD |
+| **Active Directory** | AWS Directory Service for Microsoft Active Directory | Create directories foran organizational charts, device registries.
+
+SSO, manage identity, etc | N/A |
+| **Network & Domain** | AWS VPC (Three layers), Internet GW, NAT GW, Elastic IP, Route 53, etc | Isolated and secure networking architecture. | CloudFlare |
+| **CDN** | AWS CloudFront | Securely deliver content with low latency and high transfer speeds | CloudFlare |
+| **Load Balancing** | AWS ALB | Ensures even request distribution and load balancing | AWS NLB |
+| **API Gateway** | AWS API Gateway | Reduces latency and improves API response times, rate-limiting | Kong Gateway |
+| **Microservices** | Kubernetes (EKS) | Business logic (SSO, Sign up, Login, Logout, Forget password, trading view portal, crypto transaction, deposit (crypto, money, P2P), withdraw money, statistics (profit, asset, etc), asset management (earn, spot, futures, wallet, etc), trade, futures, notification, news, support service, refers, events, gift & campain, etc.) | ECS Fargate type |
+| **Message Broker** | AWS SNS + SQS | Asynchronous communication for order execution and notifications.
+
+Decoupled event-driven communication | Kafka |
+| **Storage** | AWS S3 | Stores metadata, trading logs, and historical records. | MinIO |
+| **Databases** | SQL: AWS RDS (PostgreSQL)
+
+NoSQL: Amazon DocumentDB | Handles structured, unstructured, and document-based data.
+
+SQL: Transactional data storage
+
+NoSQL: High-speed lookups for orders & balances | SQL: Self-managed PostgreSQL on EC2
+
+NoSQL: MongoDB Atlas |
+| **Caching** | AWS ElastiCache (Redis) | Caches frequent queries to reduce DB load | Redis |
+| **Monitoring** | AWS CloudWatch, AWS QuickSight | Observability and real-time performance tracking. | Prometheus, Grafana, Loki |
+| **Logging** | AWS CloudWatch | Aggregates logs | Promtail, Loki |
+| **Notification** | AWS SES | Mangage and trigger alerts | Alert Manager |
+| **Security** | AWS WAF, AWS Shield, IAM, Kube-bench, Kube-sec, KubeLinter, AppArmor, Cilium, Istio, Falco, seccomp,  | Protection against DDoS and unauthorized access. | Nginx ModSecurity WAF |
+
+**Constrains**
+
+| Throughput | **500 RPS** (requests per second) |
+| --- | --- |
+| Response Time | p99 response time of <100ms |
+- Solution to determine resources Per RPS and estimate total resources needed
+    - https://medium.com/geekculture/how-to-calculate-server-max-requests-per-second-38a39bb96a85
+    - **Run a Load Test Using JMeter**
+        - **Simulate API Traffic** at different RPS levels (e.g., 100 RPS, 200 RPS, 500 RPS).
+        - Measure the **latency, error rate, and system performance**.
+    - **Monitor System Resources**
+        - **Track CPU and Memory Usage** during the test.
+        - Monitor:
+            - **EKS Cluster** (Node resource utilization)
+            - **EC2 Instances** (CPU, RAM consumption)
+            - **Database Performance** (Query time, CPU, IOPS)
+            - **Caching Layer** (ElastiCache hit ratio)
+            - ,etc.
+    - **Calculate Resource Consumption Per RPS**
+        - **vCPU per request** = Total vCPU usage during test / Total RPS
+        - **Memory per request** = Total RPS Total RAM usage during test (MB) / Total RPS
+        - Assumption for this architecture
+            
+            
+            | **Parameter** | **Value** |
+            | --- | --- |
+            | **Throughput** | 500 RPS (problem requirement) |
+            | **Average Response Time** | 50ms (to meet p99 < 100ms) (a **buffer** to ensure that even under occasional high-load conditions, **most requests complete much faster** than 100ms.) |
+            | **Concurrency** | 500 RPS × 50ms = ~25 concurrent requests |
+            | **Assumption resource per request** | **0.25 vCPU, 250 MB RAM** |
+        - Refers
+            - https://medium.com/geekculture/how-to-calculate-server-max-requests-per-second-38a39bb96a85
+            - https://docs.oracle.com/en/cloud/paas/integration-cloud/oracle-integration-oci/calculate-requests-second.html
+
+---
+
+## **2. Failures Strategy & High Availability**
+
+Based on the requirements of this task, Warm Standby is the best disaster recovery strategy because it ensures rapid failover, scalability, and high availability while remaining cost-effective. It keeps a secondary AZ partially active, allowing for quick recovery with minimal downtime and near-zero data loss, unlike slower Backup & Restore or costly Multi-Site Active/Active strategy.
+
+| **Strategy** | **Failures** | **Scalability** | **Cost-Effectiveness** | **Availability** | **RTO (Recovery Time Objective)** | **RPO (Recovery Point Objective)** |
+| --- | --- | --- | --- | --- | --- | --- |
+| **Backup & Restore** | ❌ Poor | ❌ Slow | ✅ Low-cost | ❌ Low | ⏳ Hours | ⏳ Hours (Data Loss Possible) |
+| **Pilot Light** | ⚠️ Partial | ⚠️ Needs Scaling | ✅ Low-cost | ⚠️ Medium | ⏳ Minutes to Hours | ⏳ Minutes to Hours |
+| **Warm Standby** ✅ **Best Balance** | ✅ Fast | ✅ Can Scale | ✅ Cost-efficient | ✅ High | ⏳ **1-5 mins** | ⏳ **Milliseconds to Seconds** (Using Continuous Replication) |
+| **Multi-Site Active/Active** | ✅ No downtime | ✅ Best | ❌ Expensive | ✅✅ **Highest** | ⏳ **Instant** | ⏳ **Zero (No Data Loss)** |
+
+For another components like metadata, DB, compute, etc. that should have the corresponding DR strategy to make sure a failures requirements:
+
+| **Strategy** | **Implementation** |
+| --- | --- |
+| **Backup & Restore** | RDS Snapshots, S3 Versioning, PITR in DynamoDB |
+| **Multi-Zone Deployment** | RDS, DynamoDB, and EKS deployed across multiple AZs |
+| **Failover Mechanism** | Warm Standby in a separate AWS AZs |
+| **Auto-Failover** | RDS Multi-AZ, Kubernetes pod rescheduling |
+
+**Refers**
+
+- https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html
+
+## **3. Scaling Strategy**
+
+Below is the plans for scaling when the product grows beyond current infrastructure.
+
+| **Scaling Strategy** | **Implementation** |
+| --- | --- |
+| **Horizontal Scaling** | Microservices: Deployments, HPA
+EKS nodes: Cluster Autoscaler |
+| **Database Scaling** | Read replicas and partitioning in RDS |
+| **Load Balancing** | AWS ALB for load balancing between multiple zones
+
+AWS Global Accelerator for worldwide traffic |
+| **Asynchronous Processing** | SNS + SQS to decouple workloads and distribute the loads |
+| **Edge Caching** | CloudFront for low-latency content delivery |
+
+---
+
+## **4. Cost Optimization**
+
+| **Cost Factor** | **Optimization Strategy** |
+| --- | --- |
+| **Compute Costs** | Use Spot Instances for non-critical workloads |
+| **Database Costs** | Optimize queries, enable RDS auto-scaling |
+| **Storage Costs** | S3 lifecycle policies for archive management |
+| **Traffic Costs** | Reduce outbound traffic using CloudFront caching |
+
+---
+
+## 5. CICD pipeline
+
+### Diagram
+
+![Diagrams-99Tech.CICD.V1.0.0 (1).png](attachment:9fd219c9-5a97-42e5-806f-ae773bdda7d1:Diagrams-99Tech.CICD.V1.0.0_(1).png)
+
+### DEV and QAC
+
+This pipeline is primarily designed for continuous integration (CI) and continuous deployment (CD) in the **development (DEV)** and **quality assurance control (QAC)** environments.
+
+**CI**
+
+- **Trigger**: Automatically triggered when an engineer commits and pushes changes to GitLab.
+- **Stages:**
+    1. **Software Composition Analysis (SCA)** - Scans for vulnerabilities in dependencies.
+        - If it fails → Pipeline exits.
+    2. **Static Application Security Testing (SAST)** - Analyzes code for security vulnerabilities.
+        - If it fails → Pipeline exits.
+    3. **Testing Stage**:
+        - Code Linter, Unit Tests, Regression Tests, etc.
+        - If any test fails → Pipeline exits.
+    4. **Build & Push**:
+        - The application is built and pushed to **Elastic Container Registry (ECR)**.
+        - If this step fails → Pipeline exits.
+
+**CD**
+
+- **Trigger**: Automatically starts once the CI pipeline completes successfully.
+- **Stages:**
+    1. **ArgoCD pulls HelmChart**.
+        - If fails → Pipeline exits.
+    2. **Deploy to Amazon EKS (Elastic Kubernetes Service)**.
+        - If fails → Pipeline exits.
+    3. **PostSync Validation**:
+        - End-to-End (E2E) Testing.
+        - Dynamic Application Security Testing (DAST).
+        - If any test fails → Pipeline exits.
+
+### STG and PRD
+
+This pipeline is designed for **staging (STG)** and **production (PRD)** environments.
+
+**CI**
+
+- **Trigger**: **Manual** trigger based on a *semantic version tag (V.*.*)**.
+- **Stages:**
+    1. **Software Composition Analysis (SCA)**.
+        - If it fails → Pipeline exits.
+    2. **Static Application Security Testing (SAST)**.
+        - If it fails → Pipeline exits.
+    3. **Testing Stage**:
+        - Code Linter, Unit Tests, Regression Tests, etc.
+        - If any test fails → Pipeline exits.
+    4. **Build & Push**:
+        - The application is built and pushed to **Elastic Container Registry (ECR)**.
+        - If this step fails → Pipeline exits.
+
+**CD**
+
+- **Trigger**: **Manual webhook trigger** initiated by an engineer.
+- **Stages:**
+    1. **ArgoCD pulls HelmChart**.
+        - If fails → Pipeline exits.
+    2. **Deploy to Amazon EKS**.
+        - If fails → Pipeline exits.
+    3. **PostSync Validation**:
+        - End-to-End (E2E) Testing.
+        - Dynamic Application Security Testing (DAST).
+        - If any test fails → Pipeline exits.
+
+### **Comparison (difference)**
+
+| **Category** | **DEV/QAC CI/CD** | **STG/PRD CI/CD** |
+| --- | --- | --- |
+| **Trigger Type (CI)** | Automatic trigger on commit | Manual trigger with semantic versioning
+ |
+| **Trigger Type (CD)** | Automatically starts after CI completes | Requires manual webhook trigger by engineer |
+| **Deployment Approach** | Continuous integration and deployment | More controlled and manual approach for stability |
+| **Environment Segregation** | Early-stage testing and validation | More stable and intended for production releases |
+| **Versioning Strategy** | Does **not** use semantic versioning (runs on commit) | Requires **semantic version tag** before execution |
