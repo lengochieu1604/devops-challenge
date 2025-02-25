@@ -130,48 +130,31 @@ Here is the high-level **architecture diagram** for the trading system on AWS. I
 - https://docs.aws.amazon.com/whitepapers/latest/active-directory-domain-services/design-consideration-for-aws-managed-microsoft-active-directory.html
 - https://aws.amazon.com/blogs/database/configuring-amazon-elasticache-for-redis-for-higher-availability/
 
-![image.png](attachment:28e8cf0c-2134-48a7-a6c0-0f3a99b0cc4e:image.png)
+![Diagrams-99Tech AWS v1 0 0](https://github.com/user-attachments/assets/5ba64a2c-3565-4304-b233-4373e0c11d89)
 
 ### Architecture components and explaination
 
-| **Category** | **Technology Stack** | **Purpose** | **Alternatives considered** |
-| --- | --- | --- | --- |
-| **Cloud Provider** | AWS | Provides global scalability, redundancy, and cost efficiency. | Azure/GCP |
-| **Environments** | DEV, QAC, STG, PRD | Isolated environments for development, testing, pre-production and production. | N/A |
-| **SVC** | Gitlab Server | Provides a private repositories, issue-following capabilities, and wikis | Github Server |
-| **Programming** | Fe: React
-Be: Node.js | Frontend for user interfaces
-
-Backend for trading logic | N/A |
-| **CI/CD** | CI: GitLab CI
-CD: ArgoCD | Automated CI and CD to build an application image and deploy and container orchestration. | CI: Github Action
-CD: Harness CD |
-| **Active Directory** | AWS Directory Service for Microsoft Active Directory | Create directories foran organizational charts, device registries.
-
-SSO, manage identity, etc | N/A |
-| **Network & Domain** | AWS VPC (Three layers), Internet GW, NAT GW, Elastic IP, Route 53, etc | Isolated and secure networking architecture. | CloudFlare |
-| **CDN** | AWS CloudFront | Securely deliver content with low latency and high transfer speeds | CloudFlare |
-| **Load Balancing** | AWS ALB | Ensures even request distribution and load balancing | AWS NLB |
-| **API Gateway** | AWS API Gateway | Reduces latency and improves API response times, rate-limiting | Kong Gateway |
-| **Microservices** | Kubernetes (EKS) | Business logic (SSO, Sign up, Login, Logout, Forget password, trading view portal, crypto transaction, deposit (crypto, money, P2P), withdraw money, statistics (profit, asset, etc), asset management (earn, spot, futures, wallet, etc), trade, futures, notification, news, support service, refers, events, gift & campain, etc.) | ECS Fargate type |
-| **Message Broker** | AWS SNS + SQS | Asynchronous communication for order execution and notifications.
-
-Decoupled event-driven communication | Kafka |
+| **Category** | **Technology Stack** | **Purpose** | **Alternatives Considered** |
+|-------------|----------------------|------------|----------------------------|
+| **Cloud Provider** | AWS | Provides global scalability, redundancy, and cost efficiency. | Azure / GCP |
+| **Environments** | DEV, QAC, STG, PRD | Isolated environments for development, testing, pre-production, and production. | N/A |
+| **Source Version Control (SVC)** | GitLab Server | Provides private repositories, issue tracking, and wikis. | GitHub Server |
+| **Programming** | - **Frontend**: React <br> - **Backend**: Node.js | Frontend for user interfaces <br> Backend for trading logic | N/A |
+| **CI/CD** | - **CI**: GitLab CI <br> - **CD**: ArgoCD | Automated CI and CD to build an application image and deploy to container orchestration. | - **CI**: GitHub Actions <br> - **CD**: Harness CD |
+| **Active Directory** | AWS Directory Service for Microsoft Active Directory | Create directories for organizational charts, device registries, SSO, and identity management. | N/A |
+| **Network & Domain** | AWS VPC (Three layers), Internet GW, NAT GW, Elastic IP, Route 53, etc. | Isolated and secure networking architecture. | CloudFlare |
+| **CDN** | AWS CloudFront | Securely deliver content with low latency and high transfer speeds. | CloudFlare |
+| **Load Balancing** | AWS ALB | Ensures even request distribution and load balancing. | AWS NLB |
+| **API Gateway** | AWS API Gateway | Reduces latency and improves API response times with rate-limiting. | Kong Gateway |
+| **Microservices** | Kubernetes (EKS) | Business logic services such as SSO, sign-up, login, logout, trading view portal, crypto transactions, deposits (crypto, money, P2P), withdrawals, statistics, asset management, trade, futures, notifications, news, support, referral programs, events, and campaigns. | ECS Fargate type |
+| **Message Broker** | AWS SNS + SQS | Asynchronous communication for order execution and notifications with decoupled event-driven communication. | Kafka |
 | **Storage** | AWS S3 | Stores metadata, trading logs, and historical records. | MinIO |
-| **Databases** | SQL: AWS RDS (PostgreSQL)
-
-NoSQL: Amazon DocumentDB | Handles structured, unstructured, and document-based data.
-
-SQL: Transactional data storage
-
-NoSQL: High-speed lookups for orders & balances | SQL: Self-managed PostgreSQL on EC2
-
-NoSQL: MongoDB Atlas |
-| **Caching** | AWS ElastiCache (Redis) | Caches frequent queries to reduce DB load | Redis |
+| **Databases** | - **SQL**: AWS RDS (PostgreSQL) <br> - **NoSQL**: Amazon DocumentDB | - **SQL**: Transactional data storage <br> - **NoSQL**: High-speed lookups for orders & balances | - **SQL**: Self-managed PostgreSQL on EC2 <br> - **NoSQL**: MongoDB Atlas |
+| **Caching** | AWS ElastiCache (Redis) | Caches frequent queries to reduce DB load. | Redis |
 | **Monitoring** | AWS CloudWatch, AWS QuickSight | Observability and real-time performance tracking. | Prometheus, Grafana, Loki |
-| **Logging** | AWS CloudWatch | Aggregates logs | Promtail, Loki |
-| **Notification** | AWS SES | Mangage and trigger alerts | Alert Manager |
-| **Security** | AWS WAF, AWS Shield, IAM, Kube-bench, Kube-sec, KubeLinter, AppArmor, Cilium, Istio, Falco, seccomp,  | Protection against DDoS and unauthorized access. | Nginx ModSecurity WAF |
+| **Logging** | AWS CloudWatch | Aggregates logs. | Promtail, Loki |
+| **Notification** | AWS SES | Manages and triggers alerts. | Alert Manager |
+| **Security** | AWS WAF, AWS Shield, IAM, Kube-bench, Kube-sec, KubeLinter, AppArmor, Cilium, Istio, Falco, seccomp | Protection against DDoS and unauthorized access. | Nginx ModSecurity WAF |
 
 **Constrains**
 
@@ -238,15 +221,14 @@ For another components like metadata, DB, compute, etc. that should have the cor
 Below is the plans for scaling when the product grows beyond current infrastructure.
 
 | **Scaling Strategy** | **Implementation** |
-| --- | --- |
-| **Horizontal Scaling** | Microservices: Deployments, HPA
-EKS nodes: Cluster Autoscaler |
-| **Database Scaling** | Read replicas and partitioning in RDS |
-| **Load Balancing** | AWS ALB for load balancing between multiple zones
+|----------------------|--------------------|
+| **Horizontal Scaling** | - **Microservices**: Deployments, Horizontal Pod Autoscaler (HPA) <br> - **EKS Nodes**: Cluster Autoscaler |
+| **Database Scaling** | - Read replicas and partitioning in Amazon RDS |
+| **Load Balancing** | - **AWS ALB**: Load balancing between multiple availability zones <br> - **AWS Global Accelerator**: Improves worldwide traffic distribution |
+| **Asynchronous Processing** | - **SNS + SQS**: Decouples workloads and distributes loads efficiently |
+| **Edge Caching** | - **CloudFront**: Low-latency content delivery and caching at the edge |
 
-AWS Global Accelerator for worldwide traffic |
-| **Asynchronous Processing** | SNS + SQS to decouple workloads and distribute the loads |
-| **Edge Caching** | CloudFront for low-latency content delivery |
+---
 
 ---
 
@@ -265,7 +247,7 @@ AWS Global Accelerator for worldwide traffic |
 
 ### Diagram
 
-![Diagrams-99Tech.CICD.V1.0.0 (1).png](attachment:9fd219c9-5a97-42e5-806f-ae773bdda7d1:Diagrams-99Tech.CICD.V1.0.0_(1).png)
+![Diagrams-99Tech CICD V1 0 0 (1)](https://github.com/user-attachments/assets/e6ec5651-9354-4272-9856-d573a78f1c2e)
 
 ### DEV and QAC
 
@@ -334,9 +316,8 @@ This pipeline is designed for **staging (STG)** and **production (PRD)** environ
 ### **Comparison (difference)**
 
 | **Category** | **DEV/QAC CI/CD** | **STG/PRD CI/CD** |
-| --- | --- | --- |
-| **Trigger Type (CI)** | Automatic trigger on commit | Manual trigger with semantic versioning
- |
+|-------------|-------------------|-------------------|
+| **Trigger Type (CI)** | Automatic trigger on commit | Manual trigger with semantic versioning |
 | **Trigger Type (CD)** | Automatically starts after CI completes | Requires manual webhook trigger by engineer |
 | **Deployment Approach** | Continuous integration and deployment | More controlled and manual approach for stability |
 | **Environment Segregation** | Early-stage testing and validation | More stable and intended for production releases |
