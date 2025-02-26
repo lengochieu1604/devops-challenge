@@ -331,3 +331,52 @@ This pipeline is designed for **staging (STG)** and **production (PRD)** environ
 | **Deployment Approach** | Continuous integration and deployment | More controlled and manual approach for stability |
 | **Environment Segregation** | Early-stage testing and validation | More stable and intended for production releases |
 | **Versioning Strategy** | Does **not** use semantic versioning (runs on commit) | Requires **semantic version tag** before execution |
+
+## 6. WBS
+
+<img width="963" alt="image" src="https://github.com/user-attachments/assets/3cce4e38-1c8b-4d20-8fd5-cff00b87bacf" />
+
+This **Work Breakdown Structure (WBS) for Blockchain Application V1.0.0** outlines the tasks and timeline for a **6-week project**. The breakdown consists of four major **epics/tasks**, each with specific work items and an associated timeline (marked across weeks W1 to W6).
+
+- **Duration**
+    - 6 Weeks
+- **Assumption**
+    - 1 week = 5 working days
+    - 1 day = 8 hours
+
+### **Proof of Concept (POC)**
+
+**Goal**: Define scope, architecture, and CI/CD strategy.
+
+- **Planning (W1)**
+    - Define project scope, objectives, and definition of done (DoD).
+- **Project Kick-off (W1)**
+    - Design an architecture.
+    - Design a CI/CD flow.
+
+### **Functional Development**
+
+**Goal**: Set up infrastructure and deploy the application.
+
+- **Infrastructure (W2-W3)**
+    - Develop Terraform modules for network, compute, etc.
+    - Build infrastructure using Terraform modules.
+- **Application Deployment (W4)**
+    - Build CI/CD pipelines.
+    - Deploy the application using CI/CD pipelines.
+
+### **Testing and Refinement**
+
+**Goal**: Ensure system performance, stability, and enhancements.
+
+- **Testing (W5)**
+    - Perform load, stress, and business tests.
+- **Refinement (W5)**
+    - System refinement and enhancements.
+
+### **Handover**
+
+**Goal**: Documentation and final handover.
+
+- **Document (W6)**
+    - Build and hand over documentation to the team.
