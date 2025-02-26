@@ -31,12 +31,27 @@ Describe **how** you would **troubleshoot** the issue, and what **causes/scenari
 
 - Infrastructure architecture
     - AWS/Azure/GCP, etc.
+    - Architecture diagram
+      
+        ![Diagrams-99Tech Nginx V1 0 0 drawio](https://github.com/user-attachments/assets/25e81283-d472-41fd-babe-1dde764d836f)
+        
+    - This diagram represents a **cloud-based assumption architecture** with a **multi-tiered network design**, which is divided into three key sections:
+        1. **External Network (End Users & Attackers)**
+            - **End User Devices:** These are external clients (browsers, mobile apps) trying to access services.
+            - **Potential Attackers:** The architecture considers possible cyber threats that attempt unauthorized access, DOS/DDOS, slow client attacks, etc.
+        2. **Cloud Provider Infrastructure**
+            - **DMZ (Demilitarized Zone)**
+                - Domain Service
+                - **Firewall:** Controls incoming traffic, filtering out malicious requests before traffic enters the LAN.
+            - **LAN (Local Area Network)**
+                - **Tier 1 (Public Subnets):** Hosts an **NGINX Load Balancer (LB) VM**, which is the first point of contact for traffic from external users.
+                - **Tier 2 (Can be Public or Private Subnets):** Contains **Upstream Services**
 - Business flow
     - N/A
 - Traffic flow
-    - End user → Firewall (WAF, Firewall layer 7, etc) → VM (NginxLB) → VM Services (Upstream service 1, 2, etc.)
+    - End user → Domain Service → Firewall → VM (NginxLB) → VM Services (Upstream service 1, 2, etc.)
 
-Troubleshooting
+**Troubleshooting process**
 
 - Alert systems have raised a notification the VM memory usage is 99%
 - DevOps / SRE Engineer have joined to troubleshoot
@@ -105,7 +120,7 @@ Troubleshooting
 
 ### **2. Start Troubleshooting Process**
 
-| **Causes/scenario expect to encounter** | **Description** | **Recovery steps** | **Impact** |
+| **Causes/scenario expect to encounter order** | **Description** | **Recovery steps** | **Impact** |
 | --- | --- | --- | --- |
 | **Traffic Overhead** | Sudden spike in user traffic (e.g., live stream, flash sale) | Scale VM resources if possible (Memory), enable rate-limiting, configure WAF/CDN | Prevents overload, ensures system stability but it can lead to the downtime for a NGINX service based on the HA property of the Cloud  scalability services |
 | **NGINX LB - Logging Overhead** | Excessive logging enabled (debug mode) | Change `error_log` level to `warn` or `error` in `nginx.conf` | Reduces disk I/O and memory consumption |
@@ -144,17 +159,17 @@ Troubleshooting
     
 3. Enable rate-limiting if under attack.
 4. Adjust NGINX buffer settings to reduce memory usage.
-
-### **Long-Term Fixes**
-
-1. **Optimize NGINX Configuration:**
+    
+    ### **Long-Term Fixes**
+    
+5. **Optimize NGINX Configuration:**
     - Adjust `worker_processes`, `worker_connections`, and buffer sizes.
     - Implement proper keepalive settings.
-2. **Implement Auto-Healing:**
+6. **Implement Auto-Healing:**
     - Create a cron job to restart NGINX if memory exceeds 90%.
-3. **Set Up Additional Security Measures:**
+7. **Set Up Additional Security Measures:**
     - Implement WAF to block malicious traffic.
-4. **Upgrade System and Packages:**
+8. **Upgrade System and Packages:**
     
     ```bash
     sudo apt update && sudo apt upgrade -y
