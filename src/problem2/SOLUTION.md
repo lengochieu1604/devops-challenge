@@ -121,16 +121,19 @@ This architecture provides a **resilient, highly available, scalable, and cost-e
 
 ### **Architecture Diagram**
 
-Here is the high-level **architecture diagram** for the trading system on AWS. It visually represents the key components, network flow, and AWS infrastructure used for **scalability, resilience, and cost efficiency**.
+Here is the high-level **architecture diagram** for the trading system on AWS. It visually represents the key components, network flow, and AWS infrastructure used for **scalability, resilience, and cost efficiency**. Divided to four environments: **DEV** (Development), **QAC** (Quality Assurance), **STG** (Staging), and **PRD** (Production).
 
-**Refers**
+**STG/PRD Architecture**
 
-- https://aws.amazon.com/blogs/containers/how-to-use-multiple-load-balancer-target-group-support-for-amazon-ecs-to-access-internal-and-external-service-endpoint-using-the-same-dns-name/
-- https://aws.amazon.com/blogs/networking-and-content-delivery/integrating-your-directory-services-dns-resolution-with-amazon-route-53-resolvers/
-- https://docs.aws.amazon.com/whitepapers/latest/active-directory-domain-services/design-consideration-for-aws-managed-microsoft-active-directory.html
-- https://aws.amazon.com/blogs/database/configuring-amazon-elasticache-for-redis-for-higher-availability/
+- Zone 1 has **more worker nodes (three nodes just for the illustration)** compared to DEV/QAC.
+- This aligns with the **high availability (HA) and performance** requirement for staging and production environments.
+![image](https://github.com/user-attachments/assets/74bb6257-e6a1-4b62-8a51-44dfc2c5ef88)
 
-![Diagrams-99Tech AWS v1 0 0](https://github.com/user-attachments/assets/5ba64a2c-3565-4304-b233-4373e0c11d89)
+**DEV/QAC Architecture**
+
+- Zone 1 has **fewer worker nodes** compared to STG/PRD.
+- This aligns with **cost optimization** while still maintaining some level of HA.
+![image](https://github.com/user-attachments/assets/7397ad11-4441-4294-a524-5c36d747862d)
 
 ### Architecture components and explaination
 
@@ -161,8 +164,8 @@ Here is the high-level **architecture diagram** for the trading system on AWS. I
 | Throughput | **500 RPS** (requests per second) |
 | --- | --- |
 | Response Time | p99 response time of <100ms |
-- Solution to determine resources Per RPS and estimate total resources needed
-    - https://medium.com/geekculture/how-to-calculate-server-max-requests-per-second-38a39bb96a85
+
+- **Solution to determine resources Per RPS and estimate total resources needed**
     - **Run a Load Test Using JMeter**
         - **Simulate API Traffic** at different RPS levels (e.g., 100 RPS, 200 RPS, 500 RPS).
         - Measure the **latency, error rate, and system performance**.
@@ -186,9 +189,15 @@ Here is the high-level **architecture diagram** for the trading system on AWS. I
             | **Average Response Time** | 50ms (to meet p99 < 100ms) (a **buffer** to ensure that even under occasional high-load conditions, **most requests complete much faster** than 100ms.) |
             | **Concurrency** | 500 RPS × 50ms = ~25 concurrent requests |
             | **Assumption resource per request** | **0.25 vCPU, 250 MB RAM** |
-        - Refers
-            - https://medium.com/geekculture/how-to-calculate-server-max-requests-per-second-38a39bb96a85
-            - https://docs.oracle.com/en/cloud/paas/integration-cloud/oracle-integration-oci/calculate-requests-second.html
+            
+**Refers**
+
+- https://aws.amazon.com/blogs/containers/how-to-use-multiple-load-balancer-target-group-support-for-amazon-ecs-to-access-internal-and-external-service-endpoint-using-the-same-dns-name/
+- https://aws.amazon.com/blogs/networking-and-content-delivery/integrating-your-directory-services-dns-resolution-with-amazon-route-53-resolvers/
+- https://docs.aws.amazon.com/whitepapers/latest/active-directory-domain-services/design-consideration-for-aws-managed-microsoft-active-directory.html
+- https://aws.amazon.com/blogs/database/configuring-amazon-elasticache-for-redis-for-higher-availability/
+- https://medium.com/geekculture/how-to-calculate-server-max-requests-per-second-38a39bb96a85
+- https://docs.oracle.com/en/cloud/paas/integration-cloud/oracle-integration-oci/calculate-requests-second.html            
 
 ---
 
