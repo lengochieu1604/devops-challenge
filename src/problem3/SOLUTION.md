@@ -1,3 +1,7 @@
+# Notion format for this task
++ https://defiant-august-ce6.notion.site/Problem-3-Diagnose-Me-Doctor-1a285b7592a68165ae14d60363bb9bf9?pvs=74
+
+# Problem 3: Diagnose Me Doctor
 <aside>
 ⏰ Duration: You should not spend more than **12 hours** on this problem.
 *Time estimation is for internship roles, if you are a software professional you should spend significantly less time.*
