@@ -1,3 +1,7 @@
+# Notion format for this task
++ https://defiant-august-ce6.notion.site/Problem-1-Too-Many-Things-To-Do-1a285b7592a68143b3aedafa20e9aca7
+
+# Problem 1: Too Many Things To Do
 <aside>
 ⏰ Duration: You should not spend more than **2 hours** on this problem.
 *Time estimation is for internship roles, if you are a software professional you should spend significantly less time.*

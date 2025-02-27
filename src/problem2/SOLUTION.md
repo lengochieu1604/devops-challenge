@@ -1,3 +1,7 @@
+# Notion format for this task
++ https://defiant-august-ce6.notion.site/Problem-2-Building-Castle-In-The-Cloud-1a285b7592a68100b240f05496c22dee
+
+# Problem 2: Building Castle In The Cloud
 <aside>
 ⏰ Duration: You should not spend more than **12 hours** on this problem.
 *Time estimation is for internship roles, if you are a software professional you should spend significantly less time.*
@@ -127,13 +131,13 @@ Here is the high-level **architecture diagram** for the trading system on AWS. I
 
 - Zone 1 has **more worker nodes (three nodes just for the illustration)** compared to DEV/QAC.
 - This aligns with the **high availability (HA) and performance** requirement for staging and production environments.
-![image](https://github.com/user-attachments/assets/74bb6257-e6a1-4b62-8a51-44dfc2c5ef88)
+<img width="856" alt="image" src="https://github.com/user-attachments/assets/e7f9df41-00a6-409c-9484-2ae6d3a5659f" />
 
 **DEV/QAC Architecture**
 
 - Zone 1 has **fewer worker nodes** compared to STG/PRD.
 - This aligns with **cost optimization** while still maintaining some level of HA.
-![image](https://github.com/user-attachments/assets/7397ad11-4441-4294-a524-5c36d747862d)
+<img width="856" alt="image" src="https://github.com/user-attachments/assets/3bccdae5-ddec-430d-a4a9-99f53d46f061" />
 
 ### Architecture components and explaination
 
@@ -165,30 +169,23 @@ Here is the high-level **architecture diagram** for the trading system on AWS. I
 | --- | --- |
 | Response Time | p99 response time of <100ms |
 
-- **Solution to determine resources Per RPS and estimate total resources needed**
-    - **Run a Load Test Using JMeter**
-        - **Simulate API Traffic** at different RPS levels (e.g., 100 RPS, 200 RPS, 500 RPS).
-        - Measure the **latency, error rate, and system performance**.
-    - **Monitor System Resources**
-        - **Track CPU and Memory Usage** during the test.
-        - Monitor:
-            - **EKS Cluster** (Node resource utilization)
-            - **EC2 Instances** (CPU, RAM consumption)
-            - **Database Performance** (Query time, CPU, IOPS)
-            - **Caching Layer** (ElastiCache hit ratio)
-            - ,etc.
-    - **Calculate Resource Consumption Per RPS**
-        - **vCPU per request** = Total vCPU usage during test / Total RPS
-        - **Memory per request** = Total RPS Total RAM usage during test (MB) / Total RPS
-        - Assumption for this architecture
-            
-            
-            | **Parameter** | **Value** |
-            | --- | --- |
-            | **Throughput** | 500 RPS (problem requirement) |
-            | **Average Response Time** | 50ms (to meet p99 < 100ms) (a **buffer** to ensure that even under occasional high-load conditions, **most requests complete much faster** than 100ms.) |
-            | **Concurrency** | 500 RPS × 50ms = ~25 concurrent requests |
-            | **Assumption resource per request** | **0.25 vCPU, 250 MB RAM** |
+**List services and pricing plan that is suitable for the above constrains**
+
+| **Services** | **Default RPS can be processed** | **Pricing Plan** |
+| --- | --- | --- |
+| API Gateway | 10,000 | Default |
+| AWS ALB | Virtually unlimited number | Default |
+| AWS SQS | 3,000 | Default |
+
+After deploy an application, we can perform a Load Test to calculate the resources need for each RPS by using the below steps. Then calculate the total of resources for the AWS EKS Cluster for optimizing resources and cost
+
+- **Run a Load Test Using JMeter**
+    - Simulate API Traffic at different RPS levels (e.g., 100 RPS, 200 RPS, 500 RPS).
+    - Measure the latency, error rate, and system performance.
+- **Calculate Resource Consumption Per RPS**
+    - **vCPU per request** = Total vCPU usage during test / Total RPS
+    - **Memory per request** = Total RPS Total RAM usage during test (MB) / Total RPS
+    - **Concurrency** = The number of RPS * Response time
             
 **Refers**
 
